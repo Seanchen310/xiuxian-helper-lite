@@ -1,17 +1,18 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>修仙小幫手 Pro – 分層選單版 v5</title>
+  <title>修仙小幫手 Pro – 全圖OCR版</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.5/dist/tesseract.min.js"></script>
 </head>
 <body>
-  <h1>🧙‍♂️ 修仙小幫手 Pro – 分層選單版 v5</h1>
+  <h1>🧙‍♂️ 修仙小幫手 Pro – 全圖OCR版</h1>
 
   <section id="manual-section">
-    <h2>選擇境界</h2>
+    <h2>選擇境界與期數</h2>
     <label>大等級：
       <select id="level-major">
         <option value="">-- 請選大等級 --</option>
@@ -33,25 +34,23 @@
     </label>
     <label>細分期：
       <select id="level-phase" disabled>
-        <option value="">-- 請選期數 --</option>
+        <option value="">-- 請先選大等級 --</option>
       </select>
     </label>
-
     <h2>手動輸入當前修為與速度</h2>
-    <label>當前修為：<input id="exp-current" type="number" placeholder="例如 121372" /></label><br/>
-    <label>速度（修為/秒）：<input id="exp-speed" type="number" step="0.1" placeholder="例如 12" /></label><br/>
+    <label>當前修為：<input id="exp-current" type="number" placeholder="例如 121372" /></label>
+    <label>速度（修為/秒）：<input id="exp-speed" type="number" step="0.1" placeholder="例如 12" /></label>
     <button id="calc-manual">計算時間</button>
   </section>
 
   <section id="ocr-section">
-    <h2>截圖辨識（輔助）</h2>
+    <h2>截圖辨識（輔助，全圖OCR）</h2>
     <input type="file" id="upload" accept="image/*" />
   </section>
 
-  <pre id="result">請選擇大等級與期數，輸入數值，或上傳截圖…</pre>
+  <pre id="result">請先選擇條件並輸入數值，或上傳截圖…</pre>
   <button id="download-ics" style="display:none;">🍎 下載 iPhone 日曆提醒</button>
 
-  <canvas id="canvas" style="display:none;"></canvas>
-  <script src="script.js"></script>
+  <script src="script-fullocr.js"></script>
 </body>
 </html>
