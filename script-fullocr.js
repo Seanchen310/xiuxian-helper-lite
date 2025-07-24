@@ -48,9 +48,7 @@ function estimateTimes(current, total, speed) {
   const levelSec   = (total - current) / speed;
   const toTimeStr = secs => new Date(now.getTime()+secs*1000)
                            .toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-  const levelDate = new Date(now.getTime()+levelSec*1000);
-  // realmDate: next hour after levelDate
-  const realmDate = new Date(levelDate.getFullYear(), levelDate.getMonth(), levelDate.getDate(), levelDate.getHours()+1, 0, 0);
+  const realmDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours()+1, 0, 0);
   return {
     crystalSec,
     levelSec,
@@ -60,7 +58,7 @@ function estimateTimes(current, total, speed) {
   };
 }
 
-// 顯示結果
+// 顯示結果：三條顯示
 function showResult(info, note="") {
   lastInfo = info;
   resultBox.textContent = (note?note+"\n":"") +
@@ -105,7 +103,7 @@ upload.addEventListener("change", async e => {
   }
 });
 
-// 下載 .ics
+// 下載 .ics，只含1和3
 downloadBtn.addEventListener("click", () => {
   if (!lastInfo) return;
   const pad = n => n.toString().padStart(2,'0');
