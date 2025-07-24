@@ -1,4 +1,3 @@
-
 const levelSelect = document.getElementById("level-select");
 const currentInput = document.getElementById("exp-current");
 const totalInput   = document.getElementById("exp-total");
