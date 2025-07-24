@@ -8,8 +8,9 @@ const ctx = canvas.getContext("2d");
 function estimateTimes(current, total, speed) {
   const percent = (current / total) * 100;
   const now = new Date();
-  const remainSec1 = ((total * 0.4) - current) / speed;
-  const remainSec2 = (total - current) / speed;
+  // 修正結晶推算：固定容量 40% * total
+  const crystalTimeSec = (total * 0.4) / speed;
+  const levelUpTimeSec = (total - current) / speed;
 
   const toTimeStr = (secs) => {
     const date = new Date(now.getTime() + secs * 1000);
@@ -18,8 +19,8 @@ function estimateTimes(current, total, speed) {
 
   return {
     percent: percent.toFixed(2) + "%",
-    crystalTime: toTimeStr(remainSec1),
-    levelUpTime: toTimeStr(remainSec2),
+    crystalTime: toTimeStr(crystalTimeSec),
+    levelUpTime: toTimeStr(levelUpTimeSec),
   };
 }
 
@@ -69,6 +70,6 @@ upload.addEventListener("change", async (e) => {
       throw new Error("數值不足");
     }
   } catch {
-    // fallback: manual section already visible
+    // fallback: manual input remains visible
   }
 });
