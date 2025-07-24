@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>修仙小幫手 Pro – 全圖OCR版 v32</title>
+  <title>修仙小幫手 Pro – 全圖OCR版 v36</title>
   <link rel="stylesheet" href="style.css"/>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.5/dist/tesseract.min.js"></script>
 </head>
 <body>
-  <h1>🧙‍♂️ 修仙小幫手 Pro – 全圖OCR版 v32</h1>
+  <h1>🧙‍♂️ 修仙小幫手 Pro – 全圖OCR版 v36</h1>
   <section id="manual-section">
     <h2>選擇境界與期數</h2>
     <label>大等級：
@@ -38,14 +38,14 @@
     <h2>手動輸入當前修為與速度</h2>
     <label>當前修為：<input id="exp-current" type="number" placeholder="例如 121372"/></label><br/>
     <label>速度（修為/秒）：<input id="exp-speed" type="number" step="0.1" placeholder="例如 12"/></label><br/>
-    <button id="calc-manual" type="button">計算時間</button>
-    <div id="result" class="result">請選擇條件後，按「計算時間」。</div>
-    <button id="download-ics" style="display:none;" type="button">🍎 下載 iPhone 日曆提醒</button>
+    <button id="calc-manual">計算時間</button>
+    <div id="result">請選擇條件後，按「計算時間」。</div>
+    <button id="download-ics" style="display:none;">🍎 下載 iPhone 日曆提醒</button>
   </section>
   <section id="ocr-section" style="display:none;">
     <h2>截圖辨識（輔助，全圖OCR）</h2>
     <input type="file" id="upload" accept="image/*"/>
   </section>
-  <script src="script-fullocr.js"></script>
+  <script src="script-fullocr-v36.js"></script>
 </body>
 </html>
