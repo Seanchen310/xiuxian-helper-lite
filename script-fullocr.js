@@ -28,7 +28,7 @@ let lastInfo = null;
 
 // 當選擇大等級時，載入期數
 majorSelect.addEventListener("change", () => {
-  phaseSelect.innerHTML = '<option value="">-- 請選期數 --</option>';
+  phaseSelect.innerHTML = '<option value="">-- 請先選大等級 --</option>';
   const arr = levelData[majorSelect.value];
   if (arr) {
     ["前期","中期","後期"].forEach((lab,i) => {
@@ -64,8 +64,7 @@ function estimateTimes(current, total, speed) {
 function showResult(info, note="") {
   lastInfo = info;
   resultBox.textContent = (note?note+"\n":"") +
-    `⏰ 收結晶時間：${info.crystalTime}\n` +
-    `🚀 升級完成時間：${info.levelUpTime}`;
+    `⏰ 收結晶時間：${info.crystalTime}\n🚀 升級完成時間：${info.levelUpTime}`;
   downloadBtn.style.display = "inline-block";
 }
 
@@ -85,7 +84,6 @@ manualBtn.addEventListener("click", () => {
 upload.addEventListener("change", async e => {
   const f = e.target.files[0]; if(!f) return;
   resultBox.textContent = "🧠 全圖OCR辨識中…";
-  manualBtn.disabled = true;
   const img = new Image();
   img.src = URL.createObjectURL(f); await img.decode();
   const canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
@@ -103,19 +101,15 @@ upload.addEventListener("change", async e => {
   } catch {
     resultBox.textContent = "⚠️ OCR未識別，請手動輸入並按計算。";
   }
-  manualBtn.disabled = false;
 });
 
-// 計算「準備升級」提醒時間
+// 計算準備升級時間（下一整點前1分，限制11:00~次日00:02）
 function getPrepareTime(levelDate) {
-  const fill = levelDate;
-  // 下一整點
-  let nextHour = new Date(fill.getFullYear(), fill.getMonth(), fill.getDate(), fill.getHours()+1, 0, 0);
-  // 提前1分鐘
-  let prep = new Date(nextHour.getTime() - 60000);
-  // 時間範圍 11:00~隔天00:02
-  const start = new Date(fill.getFullYear(), fill.getMonth(), fill.getDate(), 11, 0, 0);
-  const end   = new Date(fill.getFullYear(), fill.getMonth(), fill.getDate()+1, 0, 2, 0);
+  let now = new Date();
+  let prep = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours()+1, 0, 0);
+  prep = new Date(prep.getTime() - 60000);
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 0, 0);
+  const end   = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0, 2, 0);
   if (prep < start) prep = start;
   if (prep > end) prep = end;
   return prep;
@@ -128,13 +122,13 @@ downloadBtn.addEventListener("click", () => {
   const fmt = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
   const crystalDT = lastInfo.crystalDate;
   const prepDT = getPrepareTime(lastInfo.levelDate);
-  const icsLines = [
+  const lines = [
     "BEGIN:VCALENDAR","VERSION:2.0",
     "BEGIN:VEVENT","SUMMARY:收結晶","DTSTART:"+fmt(crystalDT),"END:VEVENT",
     "BEGIN:VEVENT","SUMMARY:準備升級","DTSTART:"+fmt(prepDT),"END:VEVENT",
     "END:VCALENDAR"
   ];
-  const blob = new Blob([icsLines.join("\n")], {type:"text/calendar"});
+  const blob = new Blob([lines.join("\n")],{type:"text/calendar"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "xiuxian-helper.ics";
