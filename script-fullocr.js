@@ -37,7 +37,8 @@ function estimateTimes(cur, total, spd) {
   const now = new Date();
   const crystalSec = total * 0.4 / spd;
   const levelSec = (total - cur) / spd;
-  const format = secs => new Date(now.getTime() + secs*1000).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  const format = secs => new Date(now.getTime() + secs*1000)
+    .toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
   const levelDate = new Date(now.getTime() + levelSec*1000);
   let realm = new Date(levelDate);
   realm.setHours(levelDate.getHours()+1,0,0,0);
@@ -59,45 +60,44 @@ btnCalc.addEventListener('click', () => {
     const today0 = new Date(now); today0.setHours(0,0,0,0);
     const yesterday0 = new Date(today0); yesterday0.setDate(today0.getDate()-1);
     if (info.levelDate >= yesterday0 && info.levelDate < today0) {
-      const t = info.levelDate.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-      lvlText = '昨天 ' + t;
+      lvlText = '昨天 ' + info.levelDate.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
     } else {
       lvlText = '<span class="red">' + info.levelTime + '（已滿）</span>';
     }
   }
+  // main output
   let output = 
     `1. ⏰ 收結晶時間：${info.crystalTime}
 ` +
     `2. 📈 本階級修為集滿時間：${lvlText}
 ` +
     `3. ⚔️ 可打秘境時間：${info.realmDate.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`;
-  if (cur > total) {
-    const arr = levelData[majorSel.value];
-    const phaseIdx = arr.indexOf(total);
-    let next, nextLabel;
-    if (phaseIdx < 2) {
-      next = arr[phaseIdx+1];
-      nextLabel = ['前期','中期','後期'][phaseIdx+1] + '('+ next + ')';
-    } else {
-      const idx = majorOrder.indexOf(majorSel.value);
-      const nextMajor = majorOrder[idx+1];
-      if (nextMajor) {
-        next = levelData[nextMajor][0];
-        nextLabel = nextMajor + '·前期(' + next + ')';
-      }
+  // always compute leave-layer if next threshold exists
+  const arr = levelData[majorSel.value];
+  const phaseIdx = arr.indexOf(total);
+  let next, nextLabel;
+  if (phaseIdx < 2) {
+    next = arr[phaseIdx+1];
+    nextLabel = ['前期','中期','後期'][phaseIdx+1] + '('+ next + ')';
+  } else {
+    const idx = majorOrder.indexOf(majorSel.value);
+    const nextMajor = majorOrder[idx+1];
+    if (nextMajor) {
+      next = levelData[nextMajor][0];
+      nextLabel = nextMajor + '·前期(' + next + ')';
     }
-    if (next) {
-      const jinfo = estimateTimes(cur, next, spd);
-      output += `
+  }
+  if (next) {
+    const jinfo = estimateTimes(cur, next, spd);
+    output += `
 
 🔮 留層直升至 ${nextLabel}：需時 ${jinfo.levelTime}，預計 ${jinfo.levelTime}`;
-    }
   }
   resBox.innerHTML = output;
   btnIcs.style.display = 'inline-block';
 });
 
-// OCR handler
+// OCR
 upload.addEventListener('change', async e => {
   const f = e.target.files[0]; if (!f) return;
   resBox.textContent = '🧠 OCR辨識中…';
@@ -118,13 +118,13 @@ upload.addEventListener('change', async e => {
   }
 });
 
-// ICS download
+// ICS
 btnIcs.addEventListener('click', () => {
   if (!lastInfo) return;
   const pad = n => n.toString().padStart(2,'0');
   const fmt = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
   const cd = new Date(Date.now() + lastInfo.crystalSec*1000), rd = lastInfo.realmDate;
   const lines = ["BEGIN:VCALENDAR","VERSION:2.0","BEGIN:VEVENT","SUMMARY:收結晶","DTSTART:"+fmt(cd),"END:VEVENT","BEGIN:VEVENT","SUMMARY:可打秘境","DTSTART:"+fmt(rd),"END:VEVENT","END:VCALENDAR"];
-  const blob = new Blob([lines.join("\n")],{type:"text/calendar"}),a=document.createElement('a');
+  const blob = new Blob([lines.join("\n")],{type:"text/calendar"}), a = document.createElement('a');
   a.href = URL.createObjectURL(blob); a.download = 'xiuxian-helper.ics'; a.click();
 });
