@@ -26,7 +26,7 @@ const resultBox    = document.getElementById("result");
 const downloadBtn  = document.getElementById("download-ics");
 let lastInfo = null;
 
-// 載入期數
+// Load phases on major change
 majorSelect.addEventListener("change", () => {
   phaseSelect.innerHTML = '<option value="">-- 請先選大等級 --</option>';
   const arr = levelData[majorSelect.value];
@@ -41,7 +41,7 @@ majorSelect.addEventListener("change", () => {
   }
 });
 
-// 計算函式
+// Estimate times
 function estimateTimes(current, total, speed) {
   const now = new Date();
   const crystalSec = (total * 0.4) / speed;
@@ -49,38 +49,37 @@ function estimateTimes(current, total, speed) {
   const toTimeStr = secs => new Date(now.getTime()+secs*1000)
                            .toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
   return {
-    crystalSec, levelSec,
+    crystalSec,
+    levelSec,
     crystalTime: toTimeStr(crystalSec),
-    levelUpTime: toTimeStr(levelSec),
-    crystalDate: new Date(now.getTime()+crystalSec*1000),
     levelDate:   new Date(now.getTime()+levelSec*1000)
   };
 }
 
-// 準備升級時間：下一整點前1分鐘，限11:00~隔日00:02
+// Prepare upgrade time based on levelDate
 function getPrepareTime(levelDate) {
-  const now = new Date();
-  let prep = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours()+1, 0, 0);
+  // Next top-of-hour minus 1 minute relative to levelDate
+  let prep = new Date(levelDate.getFullYear(), levelDate.getMonth(), levelDate.getDate(), levelDate.getHours()+1, 0, 0);
   prep = new Date(prep.getTime() - 60000);
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 0, 0);
-  const end   = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0, 2, 0);
+  // Range constraints
+  const start = new Date(levelDate.getFullYear(), levelDate.getMonth(), levelDate.getDate(), 11, 0, 0);
+  const end   = new Date(levelDate.getFullYear(), levelDate.getMonth(), levelDate.getDate()+1, 0, 2, 0);
   if (prep < start) prep = start;
   if (prep > end) prep = end;
   return prep;
 }
 
-// 顯示結果，改顯示「準備升級時間」
+// Show result with prepare time
 function showResult(info, note="") {
   lastInfo = info;
-  const prepStr = new Date(getPrepareTime(info.levelDate))
-                  .toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  const prepDate = getPrepareTime(info.levelDate);
+  const prepStr = prepDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
   resultBox.textContent = (note?note+"\n":"") +
-    `⏰ 收結晶時間：${info.crystalTime}\n` +
-    `🚀 準備升級時間：${prepStr}`;
+    `⏰ 收結晶時間：${info.crystalTime}\n🚀 準備升級時間：${prepStr}`;
   downloadBtn.style.display = "inline-block";
 }
 
-// 手動計算
+// Manual calc
 manualBtn.addEventListener("click", () => {
   const c = +currentInput.value;
   const t = +phaseSelect.value;
@@ -92,7 +91,7 @@ manualBtn.addEventListener("click", () => {
   showResult(estimateTimes(c, t, s), "🔧 手動模式：");
 });
 
-// 全圖OCR
+// Full-image OCR
 upload.addEventListener("change", async e => {
   const f = e.target.files[0]; if(!f) return;
   resultBox.textContent = "🧠 OCR辨識中…";
@@ -100,7 +99,7 @@ upload.addEventListener("change", async e => {
   img.src = URL.createObjectURL(f); await img.decode();
   const canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
   canvas.width = img.width; canvas.height = img.height;
-  ctx.drawImage(img, 0, 0);
+  ctx.drawImage(img,0,0);
   try {
     const { data:{ text } } = await Tesseract.recognize(canvas, 'chi_sim');
     const nums = [...text.matchAll(/\d{4,9}/g)].map(m => +m[0]);
@@ -115,17 +114,19 @@ upload.addEventListener("change", async e => {
   }
 });
 
-// 下載 .ics
+// Download .ics
 downloadBtn.addEventListener("click", () => {
   if (!lastInfo) return;
   const pad = n => n.toString().padStart(2,'0');
   const fmt = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
-  const crystalDT = lastInfo.crystalDate;
-  const prepDT = getPrepareTime(lastInfo.levelDate);
+  const crystalSec = lastInfo.crystalSec;
+  const now = new Date();
+  const crystalDate = new Date(now.getTime() + crystalSec*1000);
+  const prepDate = getPrepareTime(lastInfo.levelDate);
   const lines = [
     "BEGIN:VCALENDAR","VERSION:2.0",
-    "BEGIN:VEVENT","SUMMARY:收結晶","DTSTART:"+fmt(crystalDT),"END:VEVENT",
-    "BEGIN:VEVENT","SUMMARY:準備升級","DTSTART:"+fmt(prepDT),"END:VEVENT",
+    "BEGIN:VEVENT","SUMMARY:收結晶","DTSTART:"+fmt(crystalDate),"END:VEVENT",
+    "BEGIN:VEVENT","SUMMARY:準備升級","DTSTART:"+fmt(prepDate),"END:VEVENT",
     "END:VCALENDAR"
   ];
   const blob = new Blob([lines.join("\n")],{type:"text/calendar"});
