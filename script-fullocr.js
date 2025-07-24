@@ -103,7 +103,7 @@ upload.addEventListener("change", async e => {
   }
 });
 
-// 下載 .ics，只含1和3
+// 下載 .ics
 downloadBtn.addEventListener("click", () => {
   if (!lastInfo) return;
   const pad = n => n.toString().padStart(2,'0');
