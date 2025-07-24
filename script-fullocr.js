@@ -48,17 +48,19 @@ function estimateTimes(current, total, speed) {
   const levelSec   = (total - current) / speed;
   const toTimeStr = secs => new Date(now.getTime()+secs*1000)
                            .toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  const levelDate = new Date(now.getTime()+levelSec*1000);
+  // realmDate: next hour after levelDate
+  const realmDate = new Date(levelDate.getFullYear(), levelDate.getMonth(), levelDate.getDate(), levelDate.getHours()+1, 0, 0);
   return {
     crystalSec,
     levelSec,
     crystalTime: toTimeStr(crystalSec),
     levelTime:   toTimeStr(levelSec),
-    // compute realm time = next top-of-hour
-    realmDate:   new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours()+1, 0, 0)
+    realmDate
   };
 }
 
-// 顯示結果：三條
+// 顯示結果
 function showResult(info, note="") {
   lastInfo = info;
   resultBox.textContent = (note?note+"\n":"") +
@@ -103,13 +105,12 @@ upload.addEventListener("change", async e => {
   }
 });
 
-// 下載 .ics，只包含1和3
+// 下載 .ics
 downloadBtn.addEventListener("click", () => {
   if (!lastInfo) return;
   const pad = n => n.toString().padStart(2,'0');
   const fmt = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
-  const now = new Date();
-  const crystalDate = new Date(now.getTime() + lastInfo.crystalSec*1000);
+  const crystalDate = new Date(Date.now() + lastInfo.crystalSec*1000);
   const realmDate = lastInfo.realmDate;
   const lines = [
     "BEGIN:VCALENDAR","VERSION:2.0",
