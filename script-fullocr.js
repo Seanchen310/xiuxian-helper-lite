@@ -26,7 +26,7 @@ const resultBox    = document.getElementById("result");
 const downloadBtn  = document.getElementById("download-ics");
 let lastInfo = null;
 
-// 載入期數
+// Load phases
 majorSelect.addEventListener("change", () => {
   phaseSelect.innerHTML = '<option value="">-- 請先選大等級 --</option>';
   const arr = levelData[majorSelect.value];
@@ -41,14 +41,16 @@ majorSelect.addEventListener("change", () => {
   }
 });
 
-// 計算函式
+// Estimate times
 function estimateTimes(current, total, speed) {
   const now = new Date();
   const crystalSec = (total * 0.4) / speed;
   const levelSec   = (total - current) / speed;
   const toTimeStr = secs => new Date(now.getTime()+secs*1000)
                            .toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-  const realmDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours()+1, 0, 0);
+  const levelDate = new Date(now.getTime() + levelSec * 1000);
+  // realmDate: next full hour after levelDate
+  const realmDate = new Date(levelDate.getFullYear(), levelDate.getMonth(), levelDate.getDate(), levelDate.getHours() + 1, 0, 0);
   return {
     crystalSec,
     levelSec,
@@ -58,17 +60,17 @@ function estimateTimes(current, total, speed) {
   };
 }
 
-// 顯示結果：三條顯示
+// Show results
 function showResult(info, note="") {
   lastInfo = info;
   resultBox.textContent = (note?note+"\n":"") +
     `1. ⏰ 收結晶時間：${info.crystalTime}\n` +
     `2. 📈 本階級修為集滿時間：${info.levelTime}\n` +
-    `3. ⚔️ 可打秘境時間：${new Date(info.realmDate).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`;
+    `3. ⚔️ 可打秘境時間：${info.realmDate.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`;
   downloadBtn.style.display = "inline-block";
 }
 
-// 手動計算
+// Manual calc
 manualBtn.addEventListener("click", () => {
   const c = +currentInput.value;
   const t = +phaseSelect.value;
@@ -80,7 +82,7 @@ manualBtn.addEventListener("click", () => {
   showResult(estimateTimes(c, t, s), "🔧 手動模式：");
 });
 
-// 全圖OCR
+// Full OCR
 upload.addEventListener("change", async e => {
   const f = e.target.files[0]; if(!f) return;
   resultBox.textContent = "🧠 OCR辨識中…";
@@ -103,12 +105,12 @@ upload.addEventListener("change", async e => {
   }
 });
 
-// 下載 .ics
+// Download .ics (only events 1 and 3)
 downloadBtn.addEventListener("click", () => {
   if (!lastInfo) return;
   const pad = n => n.toString().padStart(2,'0');
   const fmt = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
-  const crystalDate = new Date(Date.now() + lastInfo.crystalSec*1000);
+  const crystalDate = new Date(Date.now() + lastInfo.crystalSec * 1000);
   const realmDate = lastInfo.realmDate;
   const lines = [
     "BEGIN:VCALENDAR","VERSION:2.0",
