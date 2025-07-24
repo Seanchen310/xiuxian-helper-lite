@@ -63,7 +63,7 @@ function showResult(info, note="") {
   lastInfo = info;
   resultBox.textContent = (note?note+"\n":"") +
     `⏰ 收結晶時間：${info.crystalTime}\n` +
-    `🚀 升級完成時間：${info.levelUpTime}`;
+    `🚀 可打秘境時間：${info.levelUpTime}`;
   downloadBtn.style.display = "inline-block";
 }
 
