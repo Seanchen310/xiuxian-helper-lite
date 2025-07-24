@@ -1,33 +1,32 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
+  <title>修仙小幫手 Pro – 分層選單版</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>修仙小幫手 Pro – 手動優先版</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.5/dist/tesseract.min.js"></script>
 </head>
 <body>
-  <h1>🧙‍♂️ 修仙小幫手 Pro – 手動優先版</h1>
+  <h1>🧙‍♂️ 修仙小幫手 Pro – 分層選單版</h1>
 
   <section id="manual-section">
     <h2>選擇境界</h2>
-    <select id="level-select">
-      <option value="">-- 請選擇 --</option>
-      <option value="5400">三等築基 LV1 (5400)</option>
-      <option value="13000">三等築基 LV2 (13000)</option>
-      <option value="24150">三等築基 LV3 (24150)</option>
-      <option value="25000">四等結罡 LV1 (25000)</option>
-      <!-- 依序填入其他等級… -->
-      <option value="315000">渡劫 後期 (315000)</option>
-      <option value="1050000">人仙 後期 (1050000)</option>
-      <option value="2520000">仙君 後期 (2520000)</option>
-    </select>
+    <label>大等級：
+      <select id="level-major">
+        <option value="">-- 請選擇大等級 --</option>
+      </select>
+    </label>
+    <label>細分期：
+      <select id="level-phase" disabled>
+        <option value="">-- 先選大等級 --</option>
+      </select>
+    </label>
 
-    <h2>手動輸入數值（主要）</h2>
+    <h2>手動輸入當前修為與速度</h2>
     <label>當前修為：<input id="exp-current" type="number" placeholder="例如 121372" /></label><br/>
-    <label>總修為：<input id="exp-total" type="number" readonly /></label><br/>
-    <label>速度（修為/秒）：<input id="exp-speed" type="number" step="0.1" placeholder="例如 12" /></label><br/>
+    <label>修煉速度（修為/秒）：<input id="exp-speed" type="number" step="0.1" placeholder="例如 12" /></label><br/>
     <button id="calc-manual">計算時間</button>
   </section>
 
@@ -36,7 +35,7 @@
     <input type="file" id="upload" accept="image/*" />
   </section>
 
-  <pre id="result">請選擇等級或輸入數值，或上傳截圖…</pre>
+  <pre id="result">請選擇境界、輸入修為與速度，或上傳截圖…</pre>
   <button id="download-ics" style="display:none;">🍎 下載 iPhone 日曆提醒</button>
 
   <canvas id="canvas" style="display:none;"></canvas>
