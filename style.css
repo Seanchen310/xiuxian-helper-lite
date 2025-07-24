@@ -1,4 +1,7 @@
 
-body { font-family: sans-serif; background: #f3f4f6; padding: 2em; }
-h1 { color: #1e3a8a; }
+body { font-family: sans-serif; background: #f0f4f8; padding: 2em; }
+h1 { color: #1e40af; }
 pre { background: #fff; padding: 1em; border: 1px solid #ccc; white-space: pre-wrap; }
+#manual-input { background: #fff; padding: 1em; border: 1px solid #ccc; margin-top: 1em; }
+label { display: block; margin: 0.5em 0; }
+button { margin-top: 1em; padding: 0.5em 1em; }
