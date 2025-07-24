@@ -49,8 +49,7 @@ function estimateTimes(current, total, speed) {
   const toTimeStr = secs => new Date(now.getTime()+secs*1000)
                            .toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
   return {
-    crystalSec,
-    levelSec,
+    crystalSec, levelSec,
     crystalTime: toTimeStr(crystalSec),
     levelUpTime: toTimeStr(levelSec),
     crystalDate: new Date(now.getTime()+crystalSec*1000),
@@ -58,7 +57,7 @@ function estimateTimes(current, total, speed) {
   };
 }
 
-// 顯示結果：監於原先的UI
+// 顯示結果：原來顯示升級完成時間
 function showResult(info, note="") {
   lastInfo = info;
   resultBox.textContent = (note?note+"\n":"") +
@@ -101,32 +100,17 @@ upload.addEventListener("change", async e => {
   }
 });
 
-// 計算準備升級時間：下一整點前1分鐘 + 範圍
-function getPrepareTime(levelDate) {
-  let prep = new Date(levelDate);
-  prep.setHours(prep.getHours()+1, 0, 0, 0);
-  prep = new Date(prep.getTime() - 60000);
-  const start = new Date(prep);
-  start.setHours(prep.getHours() < 11 ? 11 : prep.getHours(), 0, 0, 0);
-  const end = new Date(start);
-  end.setDate(start.getDate()+1);
-  end.setHours(0, 2, 0, 0);
-  if (prep < start) prep = start;
-  if (prep > end) prep = end;
-  return prep;
-}
-
-// Download .ics: crystal at crystalDate, prepare at prepDT
+// 下載 .ics
 downloadBtn.addEventListener("click", () => {
   if (!lastInfo) return;
   const pad = n => n.toString().padStart(2,'0');
   const fmt = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
   const crystalDT = new Date(Date.now() + lastInfo.crystalSec*1000);
-  const prepDT = getPrepareTime(lastInfo.levelDate);
+  const prepDT = new Date(Date.now() + lastInfo.crystalSec*1000 - 60000); // one min before crystal
   const lines = [
     "BEGIN:VCALENDAR","VERSION:2.0",
     "BEGIN:VEVENT","SUMMARY:收結晶","DTSTART:"+fmt(crystalDT),"END:VEVENT",
-    "BEGIN:VEVENT","SUMMARY:秘境論道大會開始前1分鐘","DTSTART:"+fmt(prepDT),"END:VEVENT",
+    "BEGIN:VEVENT","SUMMARY:準備升級","DTSTART:"+fmt(prepDT),"END:VEVENT",
     "END:VCALENDAR"
   ];
   const blob = new Blob([lines.join("\n")],{type:"text/calendar"});
