@@ -1,26 +1,39 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>修仙小幫手 Pro – 分層選單版</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>修仙小幫手 Pro – 靜態選單版</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.5/dist/tesseract.min.js"></script>
 </head>
 <body>
-  <h1>🧙‍♂️ 修仙小幫手 Pro – 分層選單版</h1>
+  <h1>🧙‍♂️ 修仙小幫手 Pro – 靜態選單版</h1>
 
   <section id="manual-section">
     <h2>選擇境界</h2>
     <label>大等級：
       <select id="level-major">
         <option value="">-- 請選擇大等級 --</option>
+        <option value="三等築基">三等築基</option>
+        <option value="四等結罡">四等結罡</option>
+        <option value="五等元嬰">五等元嬰</option>
+        <option value="六等出竅">六等出竅</option>
+        <option value="七等化神">七等化神</option>
+        <option value="八等合體">八等合體</option>
+        <option value="九等渴虛">九等渴虛</option>
+        <option value="十等大乘">十等大乘</option>
+        <option value="十一等渡劫">十一等渡劫</option>
+        <option value="十二等人仙">十二等人仙</option>
+        <option value="十三等真仙">十三等真仙</option>
+        <option value="十四等金仙">十四等金仙</option>
+        <option value="十五等上仙">十五等上仙</option>
+        <option value="十六等仙君">十六等仙君</option>
       </select>
     </label>
     <label>細分期：
       <select id="level-phase" disabled>
-        <option value="">-- 先選大等級 --</option>
+        <option value="">-- 請選擇期數 --</option>
       </select>
     </label>
 
@@ -35,7 +48,7 @@
     <input type="file" id="upload" accept="image/*" />
   </section>
 
-  <pre id="result">請選擇境界、輸入修為與速度，或上傳截圖…</pre>
+  <pre id="result">請選擇境界、期數並輸入數值，或上傳截圖…</pre>
   <button id="download-ics" style="display:none;">🍎 下載 iPhone 日曆提醒</button>
 
   <canvas id="canvas" style="display:none;"></canvas>
