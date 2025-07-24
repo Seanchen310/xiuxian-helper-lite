@@ -26,7 +26,7 @@ const resultBox    = document.getElementById("result");
 const downloadBtn  = document.getElementById("download-ics");
 let lastInfo = null;
 
-// 當選擇大等級時，載入期數
+// 載入期數
 majorSelect.addEventListener("change", () => {
   phaseSelect.innerHTML = '<option value="">-- 請先選大等級 --</option>';
   const arr = levelData[majorSelect.value];
@@ -38,8 +38,6 @@ majorSelect.addEventListener("change", () => {
       phaseSelect.appendChild(o);
     });
     phaseSelect.disabled = false;
-  } else {
-    phaseSelect.disabled = true;
   }
 });
 
@@ -51,8 +49,7 @@ function estimateTimes(current, total, speed) {
   const toTimeStr = secs => new Date(now.getTime()+secs*1000)
                            .toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
   return {
-    crystalSec,
-    levelSec,
+    crystalSec, levelSec,
     crystalTime: toTimeStr(crystalSec),
     levelUpTime: toTimeStr(levelSec),
     crystalDate: new Date(now.getTime()+crystalSec*1000),
@@ -60,11 +57,26 @@ function estimateTimes(current, total, speed) {
   };
 }
 
-// 顯示結果
+// 準備升級時間：下一整點前1分鐘，限11:00~隔日00:02
+function getPrepareTime(levelDate) {
+  const now = new Date();
+  let prep = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours()+1, 0, 0);
+  prep = new Date(prep.getTime() - 60000);
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 0, 0);
+  const end   = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0, 2, 0);
+  if (prep < start) prep = start;
+  if (prep > end) prep = end;
+  return prep;
+}
+
+// 顯示結果，改顯示「準備升級時間」
 function showResult(info, note="") {
   lastInfo = info;
+  const prepStr = new Date(getPrepareTime(info.levelDate))
+                  .toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
   resultBox.textContent = (note?note+"\n":"") +
-    `⏰ 收結晶時間：${info.crystalTime}\n🚀 升級完成時間：${info.levelUpTime}`;
+    `⏰ 收結晶時間：${info.crystalTime}\n` +
+    `🚀 準備升級時間：${prepStr}`;
   downloadBtn.style.display = "inline-block";
 }
 
@@ -80,15 +92,15 @@ manualBtn.addEventListener("click", () => {
   showResult(estimateTimes(c, t, s), "🔧 手動模式：");
 });
 
-// 全圖OCR 辨識
+// 全圖OCR
 upload.addEventListener("change", async e => {
   const f = e.target.files[0]; if(!f) return;
-  resultBox.textContent = "🧠 全圖OCR辨識中…";
+  resultBox.textContent = "🧠 OCR辨識中…";
   const img = new Image();
   img.src = URL.createObjectURL(f); await img.decode();
   const canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
   canvas.width = img.width; canvas.height = img.height;
-  ctx.drawImage(img,0,0);
+  ctx.drawImage(img, 0, 0);
   try {
     const { data:{ text } } = await Tesseract.recognize(canvas, 'chi_sim');
     const nums = [...text.matchAll(/\d{4,9}/g)].map(m => +m[0]);
@@ -102,18 +114,6 @@ upload.addEventListener("change", async e => {
     resultBox.textContent = "⚠️ OCR未識別，請手動輸入並按計算。";
   }
 });
-
-// 計算準備升級時間（下一整點前1分，限制11:00~次日00:02）
-function getPrepareTime(levelDate) {
-  let now = new Date();
-  let prep = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours()+1, 0, 0);
-  prep = new Date(prep.getTime() - 60000);
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 0, 0);
-  const end   = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0, 2, 0);
-  if (prep < start) prep = start;
-  if (prep > end) prep = end;
-  return prep;
-}
 
 // 下載 .ics
 downloadBtn.addEventListener("click", () => {
