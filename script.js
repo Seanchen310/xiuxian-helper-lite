@@ -1,17 +1,3 @@
-
-const majorSelect = document.getElementById("level-major");
-const phaseSelect = document.getElementById("level-phase");
-const currentInput = document.getElementById("exp-current");
-const speedInput   = document.getElementById("exp-speed");
-const manualBtn    = document.getElementById("calc-manual");
-const upload       = document.getElementById("upload");
-const resultBox    = document.getElementById("result");
-const downloadBtn  = document.getElementById("download-ics");
-const canvas       = document.getElementById("canvas");
-const ctx          = canvas.getContext("2d");
-let lastInfo = null;
-
-// 境界資料
 const levelData = {
   "三等築基": [5400, 13000, 24150],
   "四等結罡": [25000, 26000, 44625],
@@ -29,27 +15,32 @@ const levelData = {
   "十六等仙君": [1890000, 1942500, 2520000]
 };
 
-// 初始化大等級選單
-window.addEventListener("DOMContentLoaded", () => {
-  for(const major in levelData) {
-    const opt = document.createElement("option");
-    opt.value = major;
-    opt.text = major;
-    majorSelect.appendChild(opt);
-  }
-});
+const majorSelect = document.getElementById("level-major");
+const phaseSelect = document.getElementById("level-phase");
+const currentInput = document.getElementById("exp-current");
+const speedInput   = document.getElementById("exp-speed");
+const manualBtn    = document.getElementById("calc-manual");
+const upload       = document.getElementById("upload");
+const resultBox    = document.getElementById("result");
+const downloadBtn  = document.getElementById("download-ics");
+const canvas       = document.getElementById("canvas");
+const ctx          = canvas.getContext("2d");
+let lastInfo = null;
 
-// 選擇大等級後，動態加載細分期
+// 當選擇大等級時，載入期數
 majorSelect.addEventListener("change", () => {
-  phaseSelect.innerHTML = '<option value="">-- 請選擇期數 --</option>';
-  phaseSelect.disabled = false;
-  const arr = levelData[majorSelect.value] || [];
-  ["前期","中期","後期"].forEach((label,i) => {
-    const opt = document.createElement("option");
-    opt.value = arr[i];
-    opt.text = `${label} (${arr[i]})`;
-    phaseSelect.appendChild(opt);
-  });
+  phaseSelect.innerHTML = '<option value="">-- 請選期數 --</option>';
+  phaseSelect.disabled = true;
+  const arr = levelData[majorSelect.value];
+  if (arr) {
+    ["前期", "中期", "後期"].forEach((label, i) => {
+      const opt = document.createElement("option");
+      opt.value = arr[i];
+      opt.textContent = `${label} (${arr[i]})`;
+      phaseSelect.appendChild(opt);
+    });
+    phaseSelect.disabled = false;
+  }
 });
 
 // 計算函式
@@ -70,8 +61,7 @@ function estimateTimes(current, total, speed) {
 // 顯示結果
 function showResult(info, note="") {
   lastInfo = info;
-  resultBox.textContent = 
-    (note?note+"\n":"") +
+  resultBox.textContent = (note?note+"\n":"") +
     `⏰ 收結晶時間：${info.crystalTime}\n` +
     `🚀 升級完成時間：${info.levelUpTime}`;
   downloadBtn.style.display = "inline-block";
@@ -79,14 +69,14 @@ function showResult(info, note="") {
 
 // 手動計算
 manualBtn.addEventListener("click", () => {
-  const current = +currentInput.value;
-  const total   = +phaseSelect.value;
-  const speed   = +speedInput.value;
-  if(!majorSelect.value || !phaseSelect.value || !current || !speed) {
-    alert("請完整選擇境界、期數並輸入當前修為及速度！");
+  const c = +currentInput.value;
+  const t = +phaseSelect.value;
+  const s = +speedInput.value;
+  if (!majorSelect.value || !phaseSelect.value || !c || !s) {
+    alert("請選擇完整條件並輸入修為與速度！");
     return;
   }
-  showResult(estimateTimes(current, total, speed), "🔧 手動模式：");
+  showResult(estimateTimes(c, t, s), "🔧 手動模式：");
 });
 
 // OCR 輔助
@@ -97,42 +87,40 @@ upload.addEventListener("change", async e => {
   const img = new Image();
   img.src = URL.createObjectURL(file); await img.decode();
   const w = img.width*0.3, h = img.height*0.2;
-  canvas.width=w; canvas.height=h;
-  ctx.drawImage(img, img.width-w,0,w,h,0,0,w,h);
+  canvas.width = w; canvas.height = h;
+  ctx.drawImage(img, img.width-w, 0, w, h, 0, 0, w, h);
   try {
-    const { data:{text} } = await Tesseract.recognize(canvas,'chi_sim');
-    const nums = [...text.matchAll(/\d{4,9}/g)].map(m=>+m[0]);
+    const { data:{text} } = await Tesseract.recognize(canvas, 'chi_sim');
+    const nums = [...text.matchAll(/\d{4,9}/g)].map(m => +m[0]);
     const speedMatch = text.match(/(\d+\.\d+)/);
-    if(nums.length>=2 && speedMatch && majorSelect.value) {
+    if (nums.length >= 2 && speedMatch && majorSelect.value) {
       currentInput.value = nums[0];
-      speedInput.value   = speedMatch[1];
-      // 自動選擇 total based on current > thresholds
+      speedInput.value = speedMatch[1];
+      // 自動選期數：取最小大於等於current?
       const thresholds = levelData[majorSelect.value];
-      const phaseIndex = thresholds.findIndex(thresh => nums[1] == thresh);
-      if(phaseIndex>=0) {
-        phaseSelect.selectedIndex = phaseIndex+1;
-      }
+      const phaseIndex = thresholds.findIndex(val => nums[0] < val);
+      phaseSelect.selectedIndex = phaseIndex + 1; // option index
       showResult(estimateTimes(nums[0], +phaseSelect.value, +speedMatch[1]), "🤖 OCR 模式：");
     } else throw "";
   } catch {
-    resultBox.textContent = "⚠️ OCR 無法完整擷取，請手動操作並按「計算時間」。";
+    resultBox.textContent = "⚠️ OCR 未完全識別，請手動操作並按「計算時間」。";
   }
   manualBtn.disabled = false;
 });
 
-// 下載 .ics
+// 下載日曆
 downloadBtn.addEventListener("click", () => {
-  if(!lastInfo) return;
-  const pad = n=>n.toString().padStart(2,'0');
-  const fmt = d=>`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
-  const {crystalDate, levelDate} = lastInfo;
-  const ics = [
+  if (!lastInfo) return;
+  const pad = n => n.toString().padStart(2,'0');
+  const fmt = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+  const { crystalDate, levelDate } = lastInfo;
+  const icsLines = [
     "BEGIN:VCALENDAR","VERSION:2.0",
-    "BEGIN:VEVENT","SUMMARY:收結晶（修為滿40%）","DTSTART:"+fmt(crystalDate),"END:VEVENT",
-    "BEGIN:VEVENT","SUMMARY:準備升級！（滿修為 + 打贏論道）","DTSTART:"+fmt(levelDate),"END:VEVENT",
+    "BEGIN:VEVENT","SUMMARY:收結晶","DTSTART:"+fmt(crystalDate),"END:VEVENT",
+    "BEGIN:VEVENT","SUMMARY:準備升級","DTSTART:"+fmt(levelDate),"END:VEVENT",
     "END:VCALENDAR"
-  ].join("\n");
-  const blob = new Blob([ics],{type:"text/calendar"});
+  ];
+  const blob = new Blob([icsLines.join("\n")], { type: "text/calendar" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "xiuxian-helper.ics";
