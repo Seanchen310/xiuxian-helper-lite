@@ -1,3 +1,5 @@
+// v2 修仙助手 - 手動模式全路徑正確晉升版（2025-07-25）
+
 const levelData = {
   "三等築基": [5400, 13000, 24150],
   "四等結罡": [25000, 26000, 44625],
@@ -54,20 +56,18 @@ function getPhaseIndex(phaseText) {
   return 0;
 }
 
-// 完整升級路徑模擬
-function estimateFullUpgradePath(startMajor, startPhaseIndex, currentExp, speed) {
+// 完整升級路徑模擬：每晉級都歸零，必須依序集滿每一小階
+function estimateFullUpgradePath(startMajor, startPhaseIndex, currentExp, speed, stepCount = 10) {
   let now = new Date();
   let plan = [];
   const majors = majorOrder;
   const startMajorIdx = majors.indexOf(startMajor);
 
-  // 當前大等級剩餘細分期
+  // 1. 先補完目前大等級剩餘細分期
   let curMajor = startMajor;
   let curPhaseIdx = startPhaseIndex;
   let curExp = currentExp;
-
-  // 先補完目前大等級剩餘細分期
-  for (let i = curPhaseIdx; i < 3; i++) {
+  for (let i = curPhaseIdx; i < 3 && plan.length < stepCount; i++) {
     const target = levelData[curMajor][i];
     const delta = (i === curPhaseIdx) ? (target - curExp) : target;
     const seconds = delta / speed;
@@ -75,10 +75,10 @@ function estimateFullUpgradePath(startMajor, startPhaseIndex, currentExp, speed)
     plan.push({ level: curMajor, phase: phaseLabels[i], finishTime: new Date(now), delta });
     curExp = 0; // 升下一分期歸零
   }
-  // 之後每個大等級都完整三個階段
-  for (let majorIdx = startMajorIdx + 1; majorIdx < majors.length; majorIdx++) {
+  // 2. 之後每個大等級都完整三個階段
+  for (let majorIdx = startMajorIdx + 1; majorIdx < majors.length && plan.length < stepCount; majorIdx++) {
     curMajor = majors[majorIdx];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 3 && plan.length < stepCount; i++) {
       const target = levelData[curMajor][i];
       const seconds = target / speed;
       now = new Date(now.getTime() + seconds * 1000);
@@ -93,7 +93,7 @@ function showFullPath(plan) {
   let output = `🔧 手動模式（升級全路徑預測）：\n`;
   plan.forEach((step, idx) => {
     output += `${idx+1}. ${step.level} ${step.phase} 集滿（+${step.delta}）時間：${step.finishTime.toLocaleString()}\n`;
-    // 若是每個大等級的後期，特別標註「可晉升挑戰」
+    // 若是每個大等級的後期，特別標註「可挑戰晉升秘境」
     if (step.phase === '後期') {
       output += `   ⏩ 可於此時挑戰晉升秘境\n`;
     }
@@ -137,10 +137,9 @@ manualBtn.addEventListener("click", () => {
     alert("請選擇完整條件並輸入修為與速度！");
     return;
   }
-  // 取得 phase index
   const phaseIdx = getPhaseIndex(tLabel);
-  // 計算完整升級路徑
-  const path = estimateFullUpgradePath(major, phaseIdx, c, s);
+  // 預設顯示最近10階段
+  const path = estimateFullUpgradePath(major, phaseIdx, c, s, 10);
   showFullPath(path);
 });
 
@@ -176,6 +175,5 @@ upload.addEventListener("change", async e => {
 // 下載日曆（保留原功能）
 downloadBtn.addEventListener("click", () => {
   if (!lastInfo) return alert("請先計算時間！");
-  // 這裡可自行加強為完整升級路徑日曆
   alert("下載功能尚未完善，請自行參考升級預測結果。");
 });
