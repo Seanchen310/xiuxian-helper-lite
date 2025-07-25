@@ -1,63 +1,45 @@
-<!-- v2 修仙助手 - 手動模式/全路徑預測 介面對應版（2025-07-25） -->
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <title>🧙‍♂️ 修仙小幫手 Pro</title>
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <style>
-    body { font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; padding: 2em; background: #f7f1e3; }
-    label { display: block; margin: 1em 0 0.5em 0; }
-    select, input { font-size: 1em; }
-    #result { margin-top: 1.5em; background: #fff7d6; padding: 1em; border-radius: 8px; border: 1px solid #eee; min-height: 3em; }
-    button { font-size:1em; margin: 0.5em 0.2em; }
-    #download-ics { display: none; }
-  </style>
+  <title>修仙小幫手 Pro – 全圖OCR版 v74</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <h1>🧙‍♂️ 修仙小幫手 Pro</h1>
-
-  <h2>選擇境界與期數</h2>
-  <label>大等級：
-    <select id="level-major">
-      <option value="">-- 請選大等級 --</option>
-      <option value="三等築基">三等築基</option>
-      <option value="四等結罡">四等結罡</option>
-      <option value="五等元嬰">五等元嬰</option>
-      <option value="六等出竅">六等出竅</option>
-      <option value="七等化神">七等化神</option>
-      <option value="八等合體">八等合體</option>
-      <option value="九等洞虛">九等洞虛</option>
-      <option value="十等大乘">十等大乘</option>
-      <option value="十一等渡劫">十一等渡劫</option>
-      <option value="十二等人仙">十二等人仙</option>
-      <option value="十三等真仙">十三等真仙</option>
-      <option value="十四等金仙">十四等金仙</option>
-      <option value="十五等上仙">十五等上仙</option>
-      <option value="十六等仙君">十六等仙君</option>
-    </select>
-  </label>
-  <label>細分期：
-    <select id="level-phase" disabled>
-      <option value="">-- 請先選大等級 --</option>
-    </select>
-  </label>
-
-  <h2>手動輸入當前修為與速度</h2>
-  <label>當前修為：<input id="exp-current" type="number" placeholder="例如 121372"/></label>
-  <label>速度（修為/秒）：<input id="exp-speed" type="number" step="0.1" placeholder="例如 12"/></label>
-  <button id="calc-manual">計算時間</button>
-
-  <h2>OCR 圖片辨識輔助（選用）</h2>
-  <input id="upload" type="file" accept="image/*" />
-  <canvas id="canvas" style="display:none"></canvas>
-
-  <div id="result">請選擇條件後，按「計算時間」。</div>
-  <button id="download-ics">下載日曆</button>
-
-  <!-- 請將新版 script.js 放在這一行下方 -->
-  <script src="script.js"></script>
-  <!-- 若有 Tesseract OCR 需求，請加載 CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v2.1.5/dist/tesseract.min.js"></script>
+  <h1>🧙‍♂️ 修仙小幫手 Pro – 全圖OCR版 v74</h1>
+  <section id="manual-section">
+    <h2>選擇境界與期數</h2>
+    <label>大等級：
+      <select id="level-major">
+        <option value="">-- 請選大等級 --</option>
+        <option value="三等築基">三等築基</option>
+        <option value="四等結罡">四等結罡</option>
+        <option value="五等元嬰">五等元嬰</option>
+        <option value="六等出竅">六等出竅</option>
+        <option value="七等化神">七等化神</option>
+        <option value="八等合體">八等合體</option>
+        <option value="九等渴虛">九等渴虛</option>
+        <option value="十等大乘">十等大乘</option>
+        <option value="十一等渡劫">十一等渡劫</option>
+        <option value="十二等人仙">十二等人仙</option>
+        <option value="十三等真仙">十三等真仙</option>
+        <option value="十四等金仙">十四等金仙</option>
+        <option value="十五等上仙">十五等上仙</option>
+        <option value="十六等仙君">十六等仙君</option>
+      </select>
+    </label>
+    <label>細分期：
+      <select id="level-phase" disabled>
+        <option value="">-- 請先選大等級 --</option>
+      </select>
+    </label>
+    <h2>手動輸入當前修為與速度</h2>
+    <label>當前修為：<input id="exp-current" type="number"/></label><br/>
+    <label>速度（修為/秒）：<input id="exp-speed" type="number" step="0.1"/></label><br/>
+    <button id="calc-manual">計算時間</button>
+    <div id="result">請選擇條件後，按「計算時間」。</div>
+  </section>
+  <script src="script-fullocr-v74.js"></script>
 </body>
 </html>
