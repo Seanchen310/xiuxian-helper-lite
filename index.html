@@ -1,29 +1,28 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>修仙小幫手 Pro</title>
-  <!-- Tailwind CSS -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>修仙計算機 Alpha 🐶</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-  <div class="max-w-xl w-full bg-white shadow-lg rounded-2xl p-6">
-    <h1 class="text-2xl font-bold text-gray-800 mb-4">🧙‍♂️ 修仙小幫手 Pro</h1>
-    <!-- Input Section -->
+<body class="min-h-screen flex items-center justify-center p-4">
+  <div class="max-w-xl w-full bg-[var(--golden-opacity)] rounded-2xl p-6 shadow-lg border-2 border-[var(--golden)]">
+    <h1 class="text-2xl font-bold text-[var(--teal)] mb-4 text-center">修仙計算機 Alpha 🐶</h1>
     <div class="space-y-4">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-gray-700 font-medium">大等級</label>
-          <select id="level-major" class="mt-1 block w-full border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+          <label class="block text-[var(--teal)] font-medium">大等級</label>
+          <select id="level-major" class="mt-1 block w-full rounded-lg p-2 bg-[var(--parchment-opacity)]">
             <option value="">-- 請選大等級 --</option>
             <option>三等築基</option>
-            <option>四等結罡</option>
+            <option>四等結丹</option>
             <option>五等元嬰</option>
             <option>六等出竅</option>
             <option>七等化神</option>
             <option>八等合體</option>
-            <option>九等渴虛</option>
+            <option>九等洞虛</option>
             <option>十等大乘</option>
             <option>十一等渡劫</option>
             <option>十二等人仙</option>
@@ -34,27 +33,27 @@
           </select>
         </div>
         <div>
-          <label class="block text-gray-700 font-medium">細分期</label>
-          <select id="level-phase" class="mt-1 block w-full border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-            <option value="">-- 請先選大等級 --</option>
+          <label class="block text-[var(--teal)] font-medium">細分期</label>
+          <select id="level-phase" class="mt-1 block w-full rounded-lg p-2 bg-[var(--parchment-opacity)]" disabled>
+            <option>-- 請先選大等級 --</option>
           </select>
         </div>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-gray-700 font-medium">當前修為</label>
-          <input id="exp-current" type="number" placeholder="0" class="mt-1 block w-full border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500" />
+          <label class="block text-[var(--teal)] font-medium">當前修為</label>
+          <input id="exp-current" type="number" placeholder="0" class="mt-1 block w-full rounded-lg p-2 bg-[var(--parchment-opacity)]" />
         </div>
         <div>
-          <label class="block text-gray-700 font-medium">速度 (修為/秒)</label>
-          <input id="exp-speed" type="number" step="0.1" placeholder="0" class="mt-1 block w-full border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500" />
+          <label class="block text-[var(--teal)] font-medium">速度 (修為/秒)</label>
+          <input id="exp-speed" type="number" step="0.1" placeholder="0" class="mt-1 block w-full rounded-lg p-2 bg-[var(--parchment-opacity)]" />
         </div>
       </div>
-      <button id="calc-manual" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">計算時間</button>
+      <button id="calcBtn" class="w-full bg-[var(--aqua-opacity)] text-white py-2 rounded-lg">計算時間</button>
     </div>
-    <!-- Results Section -->
-    <div id="result" class="mt-6 bg-gray-50 p-4 rounded-lg text-gray-800 whitespace-pre-line"></div>
+    <div id="result" class="mt-6 bg-[var(--parchment-opacity)] p-4 rounded-lg text-[var(--teal)] whitespace-pre-line"></div>
   </div>
-  <script src="script-fullocr-v74.js"></script>
+
+  <script src="script.js"></script>
 </body>
 </html>

@@ -1,179 +1,119 @@
-// v2 修仙助手 - 手動模式全路徑正確晉升版（2025-07-25）
+document.addEventListener('DOMContentLoaded', () => {
+  const phaseData = {
+    '三等築基':[5400,13000,24150],
+    '四等結丹':[25000,26000,44625],
+    '五等元嬰':[48825,51240,54915],
+    '六等出竅':[56490,59325,61950],
+    '七等化神':[65415,68670,72135],
+    '八等合體':[75705,79485,166950],
+    '九等洞虛':[175350,183750,193200],
+    '十等大乘':[202965,213150,223650],
+    '十一等渡劫':[262500,283500,315000],
+    '十二等人仙':[315000,861000,903000],
+    '十三等真仙':[924000,945000,950985],
+    '十四等金仙':[968100,985530,1003275],
+    '十五等上仙':[1020000,1039500,1058442],
+    '十六等仙君':[1890000,1942500,2520000]
+  };
+  const majorSel = document.getElementById('level-major');
+  const phaseSel = document.getElementById('level-phase');
+  const curInput = document.getElementById('exp-current');
+  const spdInput = document.getElementById('exp-speed');
+  const calcBtn  = document.getElementById('calcBtn');
+  const resDiv   = document.getElementById('result');
 
-const levelData = {
-  "三等築基": [5400, 13000, 24150],
-  "四等結罡": [25000, 26000, 44625],
-  "五等元嬰": [48825, 51240, 54915],
-  "六等出竅": [56490, 59325, 61950],
-  "七等化神": [65415, 68670, 72135],
-  "八等合體": [75705, 79485, 166950],
-  "九等渴虛": [175350, 183750, 193200],
-  "十等大乘": [202965, 213150, 223650],
-  "十一等渡劫": [262500, 283500, 315000],
-  "十二等人仙": [861000, 903000, 1050000],
-  "十三等真仙": [924000, 945000, 950985],
-  "十四等金仙": [968100, 985530, 1003275],
-  "十五等上仙": [1020000, 1039500, 1058442],
-  "十六等仙君": [1890000, 1942500, 2520000]
-};
-
-const phaseLabels = ['前期', '中期', '後期'];
-const majorOrder = Object.keys(levelData);
-
-const majorSelect = document.getElementById("level-major");
-const phaseSelect = document.getElementById("level-phase");
-const currentInput = document.getElementById("exp-current");
-const speedInput   = document.getElementById("exp-speed");
-const manualBtn    = document.getElementById("calc-manual");
-const upload       = document.getElementById("upload");
-const resultBox    = document.getElementById("result");
-const downloadBtn  = document.getElementById("download-ics");
-const canvas       = document.getElementById("canvas");
-const ctx          = canvas.getContext("2d");
-let lastInfo = null;
-
-// 當選擇大等級時，載入期數
-majorSelect.addEventListener("change", () => {
-  phaseSelect.innerHTML = '<option value="">-- 請選期數 --</option>';
-  phaseSelect.disabled = true;
-  const arr = levelData[majorSelect.value];
-  if (arr) {
-    ["前期", "中期", "後期"].forEach((label, i) => {
-      const opt = document.createElement("option");
-      opt.value = arr[i];
-      opt.textContent = `${label} (${arr[i]})`;
-      phaseSelect.appendChild(opt);
-    });
-    phaseSelect.disabled = false;
+  function getLegalSlot(d) {
+    const slot = new Date(d);
+    slot.setMinutes(0,0,0,0);
+    if (d.getMinutes()>0 || d.getSeconds()>0) slot.setHours(slot.getHours()+1);
+    const h = slot.getHours();
+    if ((h>=11 && h<=23) || h===0) return slot;
+    slot.setDate(slot.getDate()+1);
+    slot.setHours(11,0,0,0);
+    return slot;
   }
-});
 
-// 取得 phase index
-function getPhaseIndex(phaseText) {
-  if (phaseText.includes('前期')) return 0;
-  if (phaseText.includes('中期')) return 1;
-  if (phaseText.includes('後期')) return 2;
-  return 0;
-}
-
-// 完整升級路徑模擬：每晉級都歸零，必須依序集滿每一小階
-function estimateFullUpgradePath(startMajor, startPhaseIndex, currentExp, speed, stepCount = 10) {
-  let now = new Date();
-  let plan = [];
-  const majors = majorOrder;
-  const startMajorIdx = majors.indexOf(startMajor);
-
-  // 1. 先補完目前大等級剩餘細分期
-  let curMajor = startMajor;
-  let curPhaseIdx = startPhaseIndex;
-  let curExp = currentExp;
-  for (let i = curPhaseIdx; i < 3 && plan.length < stepCount; i++) {
-    const target = levelData[curMajor][i];
-    const delta = (i === curPhaseIdx) ? (target - curExp) : target;
-    const seconds = delta / speed;
-    now = new Date(now.getTime() + seconds * 1000);
-    plan.push({ level: curMajor, phase: phaseLabels[i], finishTime: new Date(now), delta });
-    curExp = 0; // 升下一分期歸零
-  }
-  // 2. 之後每個大等級都完整三個階段
-  for (let majorIdx = startMajorIdx + 1; majorIdx < majors.length && plan.length < stepCount; majorIdx++) {
-    curMajor = majors[majorIdx];
-    for (let i = 0; i < 3 && plan.length < stepCount; i++) {
-      const target = levelData[curMajor][i];
-      const seconds = target / speed;
-      now = new Date(now.getTime() + seconds * 1000);
-      plan.push({ level: curMajor, phase: phaseLabels[i], finishTime: new Date(now), delta: target });
-    }
-  }
-  return plan;
-}
-
-// 顯示完整升級路徑
-function showFullPath(plan) {
-  let output = `🔧 手動模式（升級全路徑預測）：\n`;
-  plan.forEach((step, idx) => {
-    output += `${idx+1}. ${step.level} ${step.phase} 集滿（+${step.delta}）時間：${step.finishTime.toLocaleString()}\n`;
-    // 若是每個大等級的後期，特別標註「可挑戰晉升秘境」
-    if (step.phase === '後期') {
-      output += `   ⏩ 可於此時挑戰晉升秘境\n`;
+  majorSel.addEventListener('change', () => {
+    const arr = phaseData[majorSel.value] || [];
+    phaseSel.innerHTML = '';
+    if (!arr.length) {
+      phaseSel.disabled = true;
+      phaseSel.innerHTML = '<option>-- 請先選大等級 --</option>';
+    } else {
+      ['前期','中期','後期'].forEach((lab,i) => {
+        const opt = document.createElement('option');
+        opt.value = arr[i];
+        opt.textContent = `${lab} (${arr[i]})`;
+        phaseSel.appendChild(opt);
+      });
+      phaseSel.disabled = false;
     }
   });
-  resultBox.textContent = output;
-  downloadBtn.style.display = "inline-block";
-}
 
-// 傳統單階段計算（僅本階收結晶與集滿）
-function estimateTimes(current, total, speed) {
-  const now = new Date();
-  const crystalSec = (total * 0.4) / speed;
-  const levelSec   = (total - current) / speed;
-  const toTimeStr = secs => new Date(now.getTime()+secs*1000)
-                           .toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-  return {
-    crystalTime: toTimeStr(crystalSec),
-    levelUpTime: toTimeStr(levelSec),
-    crystalDate: new Date(now.getTime()+crystalSec*1000),
-    levelDate:   new Date(now.getTime()+levelSec*1000)
-  };
-}
+  calcBtn.addEventListener('click', () => {
+    const major = majorSel.value;
+    const cur   = +curInput.value;
+    const spd   = +spdInput.value;
+    const arr   = phaseData[major] || [];
+    if (!major || isNaN(cur) || isNaN(spd) || !arr.length) {
+      alert('請完整填寫大等級、細分期、修為及速度');
+      return;
+    }
+    const needPhase = +phaseSel.value;
 
-// 顯示單階段計算結果
-function showResult(info, note="") {
-  lastInfo = info;
-  resultBox.textContent = (note?note+"\n":"") +
-    `⏰ 收結晶時間：${info.crystalTime}\n` +
-    `🚀 可打秘境時間：${info.levelUpTime}`;
-  downloadBtn.style.display = "inline-block";
-}
+    // 1. 收結晶時間
+    const capExp = needPhase * 0.4;
+    const remCap = capExp - (cur % needPhase);
+    const t1raw = new Date(Date.now() + (remCap / spd) * 1000);
 
-// 手動計算（完整升級路徑）
-manualBtn.addEventListener("click", () => {
-  const c = +currentInput.value;
-  const tLabel = phaseSelect.options[phaseSelect.selectedIndex]?.textContent || "";
-  const t = +phaseSelect.value;
-  const s = +speedInput.value;
-  const major = majorSelect.value;
-  if (!major || !t || !c || !s) {
-    alert("請選擇完整條件並輸入修為與速度！");
-    return;
-  }
-  const phaseIdx = getPhaseIndex(tLabel);
-  // 預設顯示最近10階段
-  const path = estimateFullUpgradePath(major, phaseIdx, c, s, 10);
-  showFullPath(path);
-});
+    // 2. 本階段集滿時間
+    let t2str, t2raw;
+    if (cur >= needPhase) {
+      t2str = '已集滿';
+      t2raw = new Date();
+    } else {
+      t2raw = new Date(Date.now() + ((needPhase - cur) / spd) * 1000);
+      t2str = t2raw.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    }
 
-// OCR 輔助（保留原本單階段顯示，避免自動模式誤導）
-upload.addEventListener("change", async e => {
-  const file = e.target.files[0]; if(!file) return;
-  resultBox.textContent = "🧠 OCR 辨識中…";
-  manualBtn.disabled = true;
-  const img = new Image();
-  img.src = URL.createObjectURL(file); await img.decode();
-  const w = img.width*0.3, h = img.height*0.2;
-  canvas.width = w; canvas.height = h;
-  ctx.drawImage(img, img.width-w, 0, w, h, 0, 0, w, h);
-  try {
-    const { data:{text} } = await Tesseract.recognize(canvas, 'chi_sim');
-    const nums = [...text.matchAll(/\d{4,9}/g)].map(m => +m[0]);
-    const speedMatch = text.match(/(\d+\.\d+)/);
-    if (nums.length >= 2 && speedMatch && majorSelect.value) {
-      currentInput.value = nums[0];
-      speedInput.value = speedMatch[1];
-      // 自動選期數：取最小大於等於current?
-      const thresholds = levelData[majorSelect.value];
-      const phaseIndex = thresholds.findIndex(val => nums[0] < val);
-      phaseSelect.selectedIndex = phaseIndex + 1; // option index
-      showResult(estimateTimes(nums[0], +phaseSelect.value, +speedMatch[1]), "🤖 OCR 模式：");
-    } else throw "";
-  } catch {
-    resultBox.textContent = "⚠️ OCR 未完全識別，請手動操作並按「計算時間」。";
-  }
-  manualBtn.disabled = false;
-});
+    // 3. 可打秘境時間
+    const lateNeed = arr[2];
+    const t3raw = cur >= lateNeed
+      ? new Date()
+      : new Date(Date.now() + ((lateNeed - cur) / spd) * 1000);
+    const t3leg = getLegalSlot(t3raw);
 
-// 下載日曆（保留原功能）
-downloadBtn.addEventListener("click", () => {
-  if (!lastInfo) return alert("請先計算時間！");
-  alert("下載功能尚未完善，請自行參考升級預測結果。");
+    // 4. 下階段全階後期集滿時間 (從 t3leg 開始)
+    const keys = Object.keys(phaseData);
+    const idx  = keys.indexOf(major);
+    const nextKey = keys[idx+1] || major;
+    const nextArr = phaseData[nextKey] || [];
+    const totalNext = nextArr[0] + nextArr[1] + nextArr[2];
+    const over = Math.max(0, cur - arr[2]);
+    const remNext = totalNext - over;
+    const t4raw = new Date(t3leg.getTime() + (remNext / spd) * 1000);
+    const t4leg = getLegalSlot(t4raw);
+
+    // 5. 模擬本紀元可至等級
+    const now = new Date();
+    const end = new Date(now);
+    end.setDate(end.getDate()+((6-now.getDay()+7)%7)); end.setHours(23,59,0,0);
+    let reach = major;
+    let leftSec = (end-now)/1000;
+    for (let i=idx+1;i<keys.length;i++){
+      const key = keys[i];
+      const needAll = phaseData[key][0]+phaseData[key][1]+phaseData[key][2];
+      const sec = needAll/phaseData[key][0];
+      if(sec<=leftSec){ reach=key; leftSec-=sec; } else break;
+    }
+
+    const fmt = d=>d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    resDiv.innerText = [
+      `1. ⏰ 收結晶時間：${fmt(t1raw)}`,
+      `2. 📈 本階段集滿時間：${t2str}`,
+      `3. ⚔️ 可打秘境時間：${fmt(t3leg)}`,
+      `4. 🔮 集滿 ${nextKey} 全階後期: ${fmt(t4raw)}，挑戰時間: ${fmt(t4leg)}`,
+      `5. ⚡ 模擬本紀元可至等級：${reach}`
+    ].join('\n');
+  });
 });
