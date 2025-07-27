@@ -4,9 +4,9 @@
   --sage:      #D2E4A3;
   --aqua:      #76E3B8;
   --teal:      #1FA898;
-  --parchment-opacity: rgba(254,253,238,0.9);
-  --golden-opacity: rgba(246,240,197,0.9);
-  --aqua-opacity: rgba(118,227,184,0.9);
+  --parchment-opacity: rgba(254,253,238,0.85);
+  --golden-opacity: rgba(246,240,197,0.85);
+  --aqua-opacity: rgba(118,227,184,0.85);
 }
 body {
   background-image: url('bg.webp');

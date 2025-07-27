@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
       : new Date(Date.now() + ((lateNeed - cur) / spd) * 1000);
     const t3leg = getLegalSlot(t3raw);
 
-    // 4. 下階段全階後期集滿時間 (從 t3leg 開始)
+    // 4. 下階段全階後期集滿時間 (從本階段集滿時間 t2raw 開始)
     const keys = Object.keys(phaseData);
     const idx  = keys.indexOf(major);
     const nextKey = keys[idx+1] || major;
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalNext = nextArr[0] + nextArr[1] + nextArr[2];
     const over = Math.max(0, cur - arr[2]);
     const remNext = totalNext - over;
-    const t4raw = new Date(t3leg.getTime() + (remNext / spd) * 1000);
+    const t4raw = new Date(t2raw.getTime() + (remNext / spd) * 1000);
     const t4leg = getLegalSlot(t4raw);
 
     // 5. 模擬本紀元可至等級
