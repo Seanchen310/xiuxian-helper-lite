@@ -1,4 +1,5 @@
 :root {
+  --white-opacity: rgba(255,255,255,0.85);
   --parchment: #FEFDEE;
   --golden:    #F6F0C5;
   --sage:      #D2E4A3;
